@@ -1,5 +1,9 @@
 import OpenAI from "openai";
 
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error("OPENAI_API_KEY is not set");
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -36,7 +40,7 @@ function safeJSONParse(text: string) {
 export async function generateNotes(text: string): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
@@ -64,7 +68,7 @@ export async function generateFlashcards(
 ): Promise<Flashcard[]> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
@@ -93,7 +97,7 @@ export async function generateQuiz(
 ): Promise<QuizQuestion[]> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
