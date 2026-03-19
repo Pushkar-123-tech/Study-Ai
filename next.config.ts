@@ -1,47 +1,15 @@
 import type { NextConfig } from "next";
-import path from "node:path";
-
-
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-    ],
-  },
-  outputFileTracingRoot: path.resolve(__dirname, '../../'),
+
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
-  
-  
-  // Compression and caching
   compress: true,
   poweredByHeader: false,
-  // Bundle analyzer (optional - uncomment if needed)
-  // webpack: (config, { isServer }) => {
-  //   if (!isServer) {
-  //     config.optimization.splitChunks.cacheGroups = {
-  //       ...config.optimization.splitChunks.cacheGroups,
-  //       vendor: {
-  //         test: /[\\/]node_modules[\\/]/,
-  //         name: 'vendors',
-  //         chunks: 'all',
-  //       },
-  //     };
-  //   }
-  //   return config;
-  // },
-} as NextConfig;
+};
 
 export default nextConfig;

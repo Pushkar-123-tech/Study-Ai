@@ -11,8 +11,10 @@
 !.yarn/versions
 
 
-.env.local
+.env.localgit push origin main --force
 .env
+
+.orchids/
 
 # testing
 /coverage

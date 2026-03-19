@@ -8,10 +8,36 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Crown, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-// Razorpay type declaration
+// Razorpay type declarations
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+  name: string;
+  description: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    email: string;
+  };
+  theme: {
+    color: string;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -74,7 +100,8 @@ export function PricingClient({ plan, isLoggedIn }: PricingClientProps) {
         order_id: orderId,
         name: "StudyAI",
         description: "Premium Subscription",
-        handler: function (response: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        handler: function (_response: RazorpayResponse) {
           // Payment successful
           toast.success("Payment successful! Your account has been upgraded to Premium.");
           window.location.href = "/dashboard?success=true";
@@ -87,7 +114,7 @@ export function PricingClient({ plan, isLoggedIn }: PricingClientProps) {
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
       console.error("Upgrade error:", error);

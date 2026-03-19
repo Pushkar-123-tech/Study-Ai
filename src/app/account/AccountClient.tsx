@@ -15,7 +15,7 @@ import { format } from "date-fns";
 interface AccountClientProps {
   user: {
     id: string;
-    email: string;
+    email?: string;
     name?: string | null;
   };
   profile: {
@@ -129,7 +129,7 @@ export function AccountClient({ user, profile }: AccountClientProps) {
               <span className="text-sm font-medium text-gray-900">Member Since</span>
             </div>
             <span className="text-sm text-gray-600">
-              {format(new Date(user.created_at), "MMM dd, yyyy")}
+              {profile && format(new Date(profile.created_at), "MMM dd, yyyy")}
             </span>
           </div>
 

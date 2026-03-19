@@ -1,12 +1,12 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY is not set");
+console.log("API KEY:", process.env.GEMINI_API_KEY);
+
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY is not set");
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /* ---------------- TYPES ---------------- */
 
@@ -39,22 +39,24 @@ function safeJSONParse(text: string) {
 
 export async function generateNotes(text: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "Create structured study notes from the provided text. Use markdown headers, bullet points, and highlight important terms with **bold**. Keep it concise but clear."
-        },
+    const model = genAI.getGenerativeModel({   model: "gemini-1.5-flash" });
+
+    const response = await model.generateContent({
+      contents: [
         {
           role: "user",
-          content: text
-        }
+          parts: [
+            {
+              text:
+                "Create structured study notes from the provided text. Use markdown headers, bullet points, and highlight important terms with **bold**. Keep it concise but clear.\n\n" +
+                text,
+            },
+          ],
+        },
       ],
-      max_tokens: 2000,
     });
 
-    return response.choices[0]?.message?.content ?? "";
+    return response.response.text();
   } catch (error) {
     console.error("Notes generation error:", error);
     throw new Error("Failed to generate notes");
@@ -67,22 +69,24 @@ export async function generateFlashcards(
   notes: string
 ): Promise<Flashcard[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "Generate exactly 8 flashcards from the notes. Return ONLY JSON in this format: {\"flashcards\": [{\"question\": \"string\", \"answer\": \"string\"}]}"
-        },
+    const model = genAI.getGenerativeModel({   model: "gemini-1.5-flash" });
+
+    const response = await model.generateContent({
+      contents: [
         {
           role: "user",
-          content: notes
-        }
+          parts: [
+            {
+              text:
+                "Generate exactly 8 flashcards from the notes. Return ONLY JSON in this format: {\"flashcards\": [{\"question\": \"string\", \"answer\": \"string\"}]}\n\n" +
+                notes,
+            },
+          ],
+        },
       ],
-      max_tokens: 2000,
     });
 
-    const parsed = safeJSONParse(response.choices[0]?.message?.content ?? "{}");
+    const parsed = safeJSONParse(response.response.text());
     return parsed.flashcards ?? [];
   } catch (error) {
     console.error("Flashcard generation error:", error);
@@ -91,27 +95,28 @@ export async function generateFlashcards(
 }
 
 /* ---------------- QUIZ GENERATOR ---------------- */
-
 export async function generateQuiz(
   notes: string
 ): Promise<QuizQuestion[]> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "Create exactly 8 multiple choice questions from the notes. Return JSON: {\"questions\": [{\"question\":\"string\", \"option_a\":\"string\", \"option_b\":\"string\", \"option_c\":\"string\", \"option_d\":\"string\", \"correct_answer\":\"A\"}]}"
-        },
+    const model = genAI.getGenerativeModel({   model: "gemini-1.5-flash" });
+
+    const response = await model.generateContent({
+      contents: [
         {
           role: "user",
-          content: notes
-        }
+          parts: [
+            {
+              text:
+                "Create exactly 8 multiple choice questions from the notes. Return JSON: {\"questions\": [{\"question\":\"string\", \"option_a\":\"string\", \"option_b\":\"string\", \"option_c\":\"string\", \"option_d\":\"string\", \"correct_answer\":\"A\"}]}\n\n" +
+                notes,
+            },
+          ],
+        },
       ],
-      max_tokens: 2000,
     });
 
-    const parsed = safeJSONParse(response.choices[0]?.message?.content ?? "{}");
+    const parsed = safeJSONParse(response.response.text());
     return parsed.questions ?? [];
   } catch (error) {
     console.error("Quiz generation error:", error);
